@@ -28,6 +28,10 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Stream<List<TodoItem>> watchAllTodos() {
+    return select(todoItems).watch();
+  }
+
   Future<int> createTodo(String title, {String content = ''}) {
     return into(todoItems).insert(
       TodoItemsCompanion(
@@ -41,13 +45,23 @@ class AppDatabase extends _$AppDatabase {
   Future<TodoItem?> getTodo(int id) =>
       managers.todoItems.filter((f) => f.id.equals(id)).getSingleOrNull();
 
-  Future<int> updateTodo(int id, {String? title, String? content}) {
+  Future<int> updateTodo(int id,
+      {String? title, String? content, bool? completed}) {
     return managers.todoItems
         .filter((f) => f.id.equals(id))
         .update((obj) => obj(
               title: title != null ? Value(title) : const Value.absent(),
               content: content != null ? Value(content) : const Value.absent(),
+              completed:
+                  completed != null ? Value(completed) : const Value.absent(),
             ));
+  }
+
+  Future<void> toggleTodo(int id) async {
+    var obj =
+        await managers.todoItems.filter((f) => f.id.equals(id)).getSingle();
+    obj = obj.copyWith(completed: Value(!obj.completed!));
+    await managers.todoItems.replace(obj);
   }
 
   Future<void> deleteTodo(int id) =>

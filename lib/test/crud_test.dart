@@ -17,6 +17,7 @@ void main() {
   tearDown(() async {
     await appDatabase.close();
   });
+
   group('CRUD', () {
     test('should be able to Create a new todo', () async {
       final todoId =
@@ -53,6 +54,20 @@ void main() {
       expect(updatedTodo!.title, 'new title');
     });
 
+    test('should be able to update todo to completed', () async {
+      final todoId = await appDatabase.createTodo('old title');
+      await appDatabase.toggleTodo(todoId);
+      final result = await appDatabase.getTodo(todoId);
+
+      expect(todoId, result!.id);
+      expect(result.completed, true);
+
+      await appDatabase.toggleTodo(todoId);
+      final result2 = await appDatabase.getTodo(todoId);
+
+      expect(result2!.completed, false);
+    });
+
     test('should be able to Delete todo', () async {
       final todoId = await appDatabase.createTodo('existing title');
       await appDatabase.deleteTodo(todoId);
@@ -60,6 +75,20 @@ void main() {
       final findTodo = await appDatabase.getTodo(todoId);
 
       expect(findTodo, null);
+    });
+  });
+
+  group('Stream CRUD', () {
+    test('should stream todos correctly', () async {
+      await appDatabase.createTodo('stream title 1');
+      await appDatabase.createTodo('stream title 2');
+      await appDatabase.createTodo('stream title 3');
+
+      final stream = appDatabase.watchAllTodos();
+
+      await expectLater(stream, emits((List<TodoItem> value) {
+        return value.length == 3;
+      }));
     });
   });
 }
