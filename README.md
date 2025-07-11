@@ -1,2 +1,2 @@
 # ugly_todo
-A TDD project I made for practice
+A TDD project I made for practice with Flutter
