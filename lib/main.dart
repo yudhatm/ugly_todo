@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:ugly_todo/database/database.dart';
+import 'package:ugly_todo/views/create_todos_view.dart';
+import 'package:ugly_todo/views/todo_dashboard.dart';
 
 void main() {
-  runApp(const MainApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final database = AppDatabase();
+
+  runApp(MainApp(database: database));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final AppDatabase database;
+
+  const MainApp({super.key, required this.database});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    return MaterialApp(
+      title: 'UglyTodo',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => TodoDashboard(database: database),
+        '/create-todos': (context) => CreateTodosView(database: database)
+      },
     );
   }
 }
