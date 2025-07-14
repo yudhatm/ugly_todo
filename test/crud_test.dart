@@ -28,14 +28,26 @@ void main() {
 
     test('should be able to Read a todo', () async {
       final todoId = await appDatabase.createTodo('read title');
-      final todo = await appDatabase.getTodo(todoId);
+      final todo = await appDatabase.findTodo(id: todoId);
 
       expect(todo!.title, 'read title');
     });
 
+    test('should be able to search list of todos', () async {
+      final todo1 = await appDatabase.createTodo('test title 1');
+      final todo2 = await appDatabase.createTodo('test title 2');
+      await appDatabase.createTodo('not a title');
+
+      final result = await appDatabase.searchTodos(titleQuery: 'test');
+
+      expect(result.length, 2);
+      expect(result[0].id, todo1);
+      expect(result[1].id, todo2);
+    });
+
     test('id after copying item should be the same', () async {
       final todoId = await appDatabase.createTodo('original title');
-      final todo = await appDatabase.getTodo(todoId);
+      final todo = await appDatabase.findTodo(id: todoId);
       final copyTodo = todo!.copyWith(title: 'new title');
 
       expect(copyTodo.id, todo.id);
@@ -48,7 +60,7 @@ void main() {
         todoId,
         title: 'new title',
       );
-      final updatedTodo = await appDatabase.getTodo(result);
+      final updatedTodo = await appDatabase.findTodo(id: result);
 
       expect(todoId, result);
       expect(updatedTodo!.title, 'new title');
@@ -57,13 +69,13 @@ void main() {
     test('should be able to update todo to completed', () async {
       final todoId = await appDatabase.createTodo('old title');
       await appDatabase.toggleTodo(todoId);
-      final result = await appDatabase.getTodo(todoId);
+      final result = await appDatabase.findTodo(id: todoId);
 
       expect(todoId, result!.id);
       expect(result.completed, true);
 
       await appDatabase.toggleTodo(todoId);
-      final result2 = await appDatabase.getTodo(todoId);
+      final result2 = await appDatabase.findTodo(id: todoId);
 
       expect(result2!.completed, false);
     });
@@ -72,7 +84,7 @@ void main() {
       final todoId = await appDatabase.createTodo('existing title');
       await appDatabase.deleteTodo(todoId);
 
-      final findTodo = await appDatabase.getTodo(todoId);
+      final findTodo = await appDatabase.findTodo(id: todoId);
 
       expect(findTodo, null);
     });

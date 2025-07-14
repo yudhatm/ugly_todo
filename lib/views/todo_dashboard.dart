@@ -45,13 +45,57 @@ class TodoDashboard extends StatelessWidget {
             itemBuilder: (context, index) {
               final todo = todos[index];
 
-              return ListTile(
+              return Dismissible(
+                key: Key(todo.id.toString()),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.only(right: 20),
+                  child: Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                confirmDismiss: (direction) async {
+                  return await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Delete Todo'),
+                      content: Text(
+                          'Are you sure you want to delete "${todo.title}"?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style:
+                              TextButton.styleFrom(foregroundColor: Colors.red),
+                          child: Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                onDismissed: (direction) {
+                  database.deleteTodo(todo.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${todo.title} deleted')),
+                  );
+                },
+                child: ListTile(
                   title: Text(todo.title),
                   subtitle: Text(todo.content),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () => database.deleteTodo(todo.id),
-                  ));
+                  trailing: Checkbox(
+                      value: todo.completed,
+                      onChanged: (value) {
+                        database.toggleTodo(todo.id);
+                      }),
+                ),
+              );
             },
           );
         },

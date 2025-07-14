@@ -42,8 +42,33 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  Future<TodoItem?> getTodo(int id) =>
-      managers.todoItems.filter((f) => f.id.equals(id)).getSingleOrNull();
+  Future<TodoItem?> findTodo({int? id, String? titleQuery}) async {
+    var query = managers.todoItems;
+
+    if (id != null) {
+      return await query.filter((f) => f.id.equals(id)).getSingle();
+    }
+
+    if (titleQuery != null) {
+      return await query.filter((f) => f.title.equals(titleQuery)).getSingle();
+    }
+
+    return null;
+  }
+
+  Future<List<TodoItem>> searchTodos({int? id, String? titleQuery}) async {
+    var query = managers.todoItems;
+
+    if (id != null) {
+      return await query.filter((f) => f.id.equals(id)).get();
+    }
+
+    if (titleQuery != null) {
+      return await query.filter((f) => f.title.contains(titleQuery)).get();
+    }
+
+    return [];
+  }
 
   Future<int> updateTodo(int id,
       {String? title, String? content, bool? completed}) {
