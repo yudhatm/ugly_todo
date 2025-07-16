@@ -101,4 +101,46 @@ void main() {
 
     await appDatabase.close();
   });
+
+  testWidgets('should become "edit todo" when todo item is passed',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: CreateTodosView(
+          database: appDatabase,
+          todo: TodoItem(
+            id: 1,
+            title: 'title',
+            content: 'content',
+          )),
+    ));
+
+    expect(find.text('Edit Todo'), findsOneWidget);
+    expect(find.text('title'), findsOneWidget);
+    expect(find.text('content'), findsOneWidget);
+  });
+
+  testWidgets('should update todo after edit is done', (tester) async {
+    await appDatabase.createTodo('title', content: 'content');
+    final newTodo = await appDatabase.findTodo(titleQuery: 'title');
+
+    await tester.pumpWidget(MaterialApp(
+      home: CreateTodosView(database: appDatabase, todo: newTodo),
+    ));
+
+    expect(find.text('Edit Todo'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField).first, 'new title');
+    await tester.enterText(find.byType(TextFormField).last, 'new content');
+
+    await tester.tap(find.byIcon(Icons.save));
+    await tester.pumpAndSettle();
+
+    final todos = await appDatabase.getAllTodos();
+
+    expect(todos.length, 1);
+    expect(todos.first.title, 'new title');
+    expect(todos.first.content, 'new content');
+
+    await appDatabase.close();
+  });
 }

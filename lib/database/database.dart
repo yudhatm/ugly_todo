@@ -32,6 +32,10 @@ class AppDatabase extends _$AppDatabase {
     return select(todoItems).watch();
   }
 
+  Future<List<TodoItem>> getAllTodos() {
+    return managers.todoItems.get();
+  }
+
   Future<int> createTodo(String title, {String content = ''}) {
     return into(todoItems).insert(
       TodoItemsCompanion(
@@ -46,11 +50,13 @@ class AppDatabase extends _$AppDatabase {
     var query = managers.todoItems;
 
     if (id != null) {
-      return await query.filter((f) => f.id.equals(id)).getSingle();
+      return await query.filter((f) => f.id.equals(id)).getSingleOrNull();
     }
 
     if (titleQuery != null) {
-      return await query.filter((f) => f.title.equals(titleQuery)).getSingle();
+      return await query
+          .filter((f) => f.title.equals(titleQuery))
+          .getSingleOrNull();
     }
 
     return null;

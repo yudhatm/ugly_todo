@@ -94,6 +94,8 @@ class TodoDashboard extends StatelessWidget {
                       onChanged: (value) {
                         database.toggleTodo(todo.id);
                       }),
+                  onTap: () => Navigator.pushNamed(context, '/create-todos',
+                      arguments: {'todo': todo}),
                 ),
               );
             },

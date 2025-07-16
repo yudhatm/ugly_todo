@@ -23,7 +23,11 @@ class MainApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => TodoDashboard(database: database),
-        '/create-todos': (context) => CreateTodosView(database: database)
+        '/create-todos': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return CreateTodosView(database: database, todo: args?['todo']);
+        }
       },
     );
   }

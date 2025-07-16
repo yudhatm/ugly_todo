@@ -4,8 +4,9 @@ import 'package:ugly_todo/database/database.dart';
 
 class CreateTodosView extends StatefulWidget {
   final AppDatabase database;
+  final TodoItem? todo;
 
-  const CreateTodosView({super.key, required this.database});
+  const CreateTodosView({super.key, required this.database, this.todo});
 
   @override
   State<CreateTodosView> createState() => _CreateTodosViewState();
@@ -17,10 +18,20 @@ class _CreateTodosViewState extends State<CreateTodosView> {
   final _contentController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+
+    if (widget.todo != null) {
+      _titleController.text = widget.todo!.title;
+      _contentController.text = widget.todo!.content;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Todo'),
+        title: Text(widget.todo == null ? 'Add Todo' : 'Edit Todo'),
         actions: [
           IconButton(
             icon: Icon(Icons.save),
@@ -68,8 +79,14 @@ class _CreateTodosViewState extends State<CreateTodosView> {
 
   void _saveTodo() {
     if (_formKey.currentState!.validate()) {
-      widget.database
-          .createTodo(_titleController.text, content: _contentController.text);
+      if (widget.todo != null) {
+        widget.database.updateTodo(widget.todo!.id,
+            title: _titleController.text, content: _contentController.text);
+      } else {
+        widget.database.createTodo(_titleController.text,
+            content: _contentController.text);
+      }
+
       Navigator.pop(context);
     }
   }

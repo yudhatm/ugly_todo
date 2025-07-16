@@ -33,6 +33,17 @@ void main() {
       expect(todo!.title, 'read title');
     });
 
+    test('should be able to get all todos', () async {
+      final todo1 = await appDatabase.createTodo('test title 1');
+      final todo2 = await appDatabase.createTodo('test title 2');
+
+      final result = await appDatabase.getAllTodos();
+
+      expect(result.length, 2);
+      expect(result[0].id, todo1);
+      expect(result[1].id, todo2);
+    });
+
     test('should be able to search list of todos', () async {
       final todo1 = await appDatabase.createTodo('test title 1');
       final todo2 = await appDatabase.createTodo('test title 2');
