@@ -4,14 +4,17 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ugly_todo/database/database.dart';
+import 'package:ugly_todo/database/tags_dao.dart';
 
 void main() {
   late AppDatabase appDatabase;
+  late TagsDao tagsDao;
 
   setUp(() {
     appDatabase = AppDatabase(DatabaseConnection(
       NativeDatabase.memory(),
     ));
+    tagsDao = TagsDao(appDatabase);
   });
 
   tearDown(() async {
@@ -163,6 +166,73 @@ void main() {
       expectLater(stream, emits((List<TodoItem> value) {
         return value.isEmpty;
       }));
+    });
+  });
+
+  group('Tag CRUD', () {
+    test('should be able to create tag', () async {
+      final tagId = await tagsDao.createTag('test tag');
+
+      expect(tagId, 1);
+    });
+
+    test('should be able to get single tag', () async {
+      final tagId = await tagsDao.createTag('test tag');
+      final tag = await tagsDao.getTag(tagId);
+
+      expect(tag?.id, tagId);
+      expect(tag?.name, 'test tag');
+    });
+
+    test('should be able to search and get multiple tags', () async {
+      final tagId1 = await tagsDao.createTag('test tag 1');
+      final tagId2 = await tagsDao.createTag('test tag 2');
+      final tagId3 = await tagsDao.createTag('personal');
+
+      final tags = await tagsDao.searchTags('tag');
+
+      expect(tags.length, 2);
+      expect(tags.first.id, tagId1);
+      expect(tags.last.id, tagId2);
+    });
+
+    test('should be able to get all tags', () async {
+      final tagId1 = await tagsDao.createTag('test tag 1');
+      final _ = await tagsDao.createTag('test tag 2');
+      final tagId3 = await tagsDao.createTag('test tag 3');
+
+      final tags = await tagsDao.getAllTags();
+
+      expect(tags.length, 3);
+      expect(tags.first.id, tagId1);
+      expect(tags.last.id, tagId3);
+    });
+
+    test('should be able to update tag', () async {
+      final tagId = await tagsDao.createTag('test tag');
+      final tagId2 = await tagsDao.createTag('test tag 2');
+
+      final tag = await tagsDao.getTag(tagId);
+      final updatedTag = tag!.copyWith(name: 'updated tag');
+
+      final status = await tagsDao.updateTag(updatedTag);
+
+      expect(status, true);
+
+      final updated = await tagsDao.getTag(tagId);
+      expect(updated?.name, 'updated tag');
+
+      final notUpdated = await tagsDao.getTag(tagId2);
+      expect(notUpdated?.name, 'test tag 2');
+    });
+
+    test('should be able to delete tag', () async {
+      final tagId = await tagsDao.createTag('test tag');
+      final tag = await tagsDao.getTag(tagId);
+
+      await tagsDao.deleteTag(tag!);
+
+      expect(await tagsDao.getTag(tagId), null);
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:ugly_todo/database/tags_dao.dart';
 
 part 'database.g.dart';
 
@@ -12,7 +13,12 @@ class TodoItems extends Table {
   BoolColumn get completed => boolean().nullable()();
 }
 
-@DriftDatabase(tables: [TodoItems])
+class Tags extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+}
+
+@DriftDatabase(tables: [TodoItems, Tags], daos: [TagsDao])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
@@ -36,14 +42,15 @@ class AppDatabase extends _$AppDatabase {
     return managers.todoItems.get();
   }
 
-  Future<int> createTodo(String title, {String content = ''}) {
-    return into(todoItems).insert(
-      TodoItemsCompanion(
-          title: Value(title),
-          content: Value(content),
-          createdAt: Value(DateTime.now()),
-          completed: Value(false)),
-    );
+  Future<int> createTodo(String title, {String content = ''}) async {
+    return await managers.todoItems.create((o) {
+      return o(
+        title: title,
+        content: content,
+        createdAt: Value(DateTime.now()),
+        completed: Value(false),
+      );
+    });
   }
 
   Future<TodoItem?> findTodo({int? id, String? titleQuery}) async {
