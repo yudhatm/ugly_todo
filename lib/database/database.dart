@@ -18,7 +18,22 @@ class Tags extends Table {
   TextColumn get name => text()();
 }
 
-@DriftDatabase(tables: [TodoItems, Tags], daos: [TagsDao])
+class TodoTags extends Table {
+  IntColumn get todoId => integer().references(TodoItems, #id)();
+  IntColumn get tagId => integer().references(Tags, #id)();
+
+  @override
+  Set<Column> get primaryKey => {todoId, tagId};
+}
+
+class TodoWithTags {
+  final TodoItem todo;
+  final List<Tag> tags;
+
+  TodoWithTags({required this.todo, required this.tags});
+}
+
+@DriftDatabase(tables: [TodoItems, Tags, TodoTags], daos: [TagsDao])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
@@ -34,8 +49,38 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  Stream<List<TodoItem>> watchAllTodos() {
-    return select(todoItems).watch();
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        beforeOpen: (details) async {
+          // This runs every time the database opens
+          await customStatement('PRAGMA foreign_keys = ON;');
+        },
+      );
+
+  Stream<List<TodoWithTags>> watchAllTodos() {
+    var stream = select(todoItems).join([
+      leftOuterJoin(todoTags, todoItems.id.equalsExp(todoTags.todoId)),
+      leftOuterJoin(tags, todoTags.tagId.equalsExp(tags.id))
+    ]).map((row) {
+      return TodoWithTags(
+          todo: TodoItem(
+            id: row.readTable(todoItems).id,
+            title: row.readTable(todoItems).title,
+            content: row.readTable(todoItems).content,
+            createdAt: row.readTable(todoItems).createdAt,
+            completed: row.readTable(todoItems).completed,
+          ),
+          tags: [row.readTable(tags)]);
+    }).watch();
+
+    stream.listen((list) {
+      print('Items: $list');
+    });
+
+    return stream;
   }
 
   Future<List<TodoItem>> getAllTodos() {

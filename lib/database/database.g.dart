@@ -485,17 +485,214 @@ class TagsCompanion extends UpdateCompanion<Tag> {
   }
 }
 
+class $TodoTagsTable extends TodoTags with TableInfo<$TodoTagsTable, TodoTag> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TodoTagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _todoIdMeta = const VerificationMeta('todoId');
+  @override
+  late final GeneratedColumn<int> todoId = GeneratedColumn<int>(
+      'todo_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES todo_items (id)'));
+  static const VerificationMeta _tagIdMeta = const VerificationMeta('tagId');
+  @override
+  late final GeneratedColumn<int> tagId = GeneratedColumn<int>(
+      'tag_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES tags (id)'));
+  @override
+  List<GeneratedColumn> get $columns => [todoId, tagId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'todo_tags';
+  @override
+  VerificationContext validateIntegrity(Insertable<TodoTag> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('todo_id')) {
+      context.handle(_todoIdMeta,
+          todoId.isAcceptableOrUnknown(data['todo_id']!, _todoIdMeta));
+    } else if (isInserting) {
+      context.missing(_todoIdMeta);
+    }
+    if (data.containsKey('tag_id')) {
+      context.handle(
+          _tagIdMeta, tagId.isAcceptableOrUnknown(data['tag_id']!, _tagIdMeta));
+    } else if (isInserting) {
+      context.missing(_tagIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {todoId, tagId};
+  @override
+  TodoTag map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TodoTag(
+      todoId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}todo_id'])!,
+      tagId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}tag_id'])!,
+    );
+  }
+
+  @override
+  $TodoTagsTable createAlias(String alias) {
+    return $TodoTagsTable(attachedDatabase, alias);
+  }
+}
+
+class TodoTag extends DataClass implements Insertable<TodoTag> {
+  final int todoId;
+  final int tagId;
+  const TodoTag({required this.todoId, required this.tagId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['todo_id'] = Variable<int>(todoId);
+    map['tag_id'] = Variable<int>(tagId);
+    return map;
+  }
+
+  TodoTagsCompanion toCompanion(bool nullToAbsent) {
+    return TodoTagsCompanion(
+      todoId: Value(todoId),
+      tagId: Value(tagId),
+    );
+  }
+
+  factory TodoTag.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TodoTag(
+      todoId: serializer.fromJson<int>(json['todoId']),
+      tagId: serializer.fromJson<int>(json['tagId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'todoId': serializer.toJson<int>(todoId),
+      'tagId': serializer.toJson<int>(tagId),
+    };
+  }
+
+  TodoTag copyWith({int? todoId, int? tagId}) => TodoTag(
+        todoId: todoId ?? this.todoId,
+        tagId: tagId ?? this.tagId,
+      );
+  TodoTag copyWithCompanion(TodoTagsCompanion data) {
+    return TodoTag(
+      todoId: data.todoId.present ? data.todoId.value : this.todoId,
+      tagId: data.tagId.present ? data.tagId.value : this.tagId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TodoTag(')
+          ..write('todoId: $todoId, ')
+          ..write('tagId: $tagId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(todoId, tagId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TodoTag &&
+          other.todoId == this.todoId &&
+          other.tagId == this.tagId);
+}
+
+class TodoTagsCompanion extends UpdateCompanion<TodoTag> {
+  final Value<int> todoId;
+  final Value<int> tagId;
+  final Value<int> rowid;
+  const TodoTagsCompanion({
+    this.todoId = const Value.absent(),
+    this.tagId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TodoTagsCompanion.insert({
+    required int todoId,
+    required int tagId,
+    this.rowid = const Value.absent(),
+  })  : todoId = Value(todoId),
+        tagId = Value(tagId);
+  static Insertable<TodoTag> custom({
+    Expression<int>? todoId,
+    Expression<int>? tagId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (todoId != null) 'todo_id': todoId,
+      if (tagId != null) 'tag_id': tagId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TodoTagsCompanion copyWith(
+      {Value<int>? todoId, Value<int>? tagId, Value<int>? rowid}) {
+    return TodoTagsCompanion(
+      todoId: todoId ?? this.todoId,
+      tagId: tagId ?? this.tagId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (todoId.present) {
+      map['todo_id'] = Variable<int>(todoId.value);
+    }
+    if (tagId.present) {
+      map['tag_id'] = Variable<int>(tagId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TodoTagsCompanion(')
+          ..write('todoId: $todoId, ')
+          ..write('tagId: $tagId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $TodoItemsTable todoItems = $TodoItemsTable(this);
   late final $TagsTable tags = $TagsTable(this);
+  late final $TodoTagsTable todoTags = $TodoTagsTable(this);
   late final TagsDao tagsDao = TagsDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [todoItems, tags];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [todoItems, tags, todoTags];
 }
 
 typedef $$TodoItemsTableCreateCompanionBuilder = TodoItemsCompanion Function({
@@ -512,6 +709,25 @@ typedef $$TodoItemsTableUpdateCompanionBuilder = TodoItemsCompanion Function({
   Value<DateTime?> createdAt,
   Value<bool?> completed,
 });
+
+final class $$TodoItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $TodoItemsTable, TodoItem> {
+  $$TodoItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$TodoTagsTable, List<TodoTag>> _todoTagsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.todoTags,
+          aliasName: $_aliasNameGenerator(db.todoItems.id, db.todoTags.todoId));
+
+  $$TodoTagsTableProcessedTableManager get todoTagsRefs {
+    final manager = $$TodoTagsTableTableManager($_db, $_db.todoTags)
+        .filter((f) => f.todoId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_todoTagsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
 
 class $$TodoItemsTableFilterComposer
     extends Composer<_$AppDatabase, $TodoItemsTable> {
@@ -536,6 +752,27 @@ class $$TodoItemsTableFilterComposer
 
   ColumnFilters<bool> get completed => $composableBuilder(
       column: $table.completed, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> todoTagsRefs(
+      Expression<bool> Function($$TodoTagsTableFilterComposer f) f) {
+    final $$TodoTagsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.todoTags,
+        getReferencedColumn: (t) => t.todoId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TodoTagsTableFilterComposer(
+              $db: $db,
+              $table: $db.todoTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$TodoItemsTableOrderingComposer
@@ -586,6 +823,27 @@ class $$TodoItemsTableAnnotationComposer
 
   GeneratedColumn<bool> get completed =>
       $composableBuilder(column: $table.completed, builder: (column) => column);
+
+  Expression<T> todoTagsRefs<T extends Object>(
+      Expression<T> Function($$TodoTagsTableAnnotationComposer a) f) {
+    final $$TodoTagsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.todoTags,
+        getReferencedColumn: (t) => t.todoId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TodoTagsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.todoTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$TodoItemsTableTableManager extends RootTableManager<
@@ -597,9 +855,9 @@ class $$TodoItemsTableTableManager extends RootTableManager<
     $$TodoItemsTableAnnotationComposer,
     $$TodoItemsTableCreateCompanionBuilder,
     $$TodoItemsTableUpdateCompanionBuilder,
-    (TodoItem, BaseReferences<_$AppDatabase, $TodoItemsTable, TodoItem>),
+    (TodoItem, $$TodoItemsTableReferences),
     TodoItem,
-    PrefetchHooks Function()> {
+    PrefetchHooks Function({bool todoTagsRefs})> {
   $$TodoItemsTableTableManager(_$AppDatabase db, $TodoItemsTable table)
       : super(TableManagerState(
           db: db,
@@ -639,9 +897,35 @@ class $$TodoItemsTableTableManager extends RootTableManager<
             completed: completed,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable(table),
+                    $$TodoItemsTableReferences(db, table, e)
+                  ))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({todoTagsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (todoTagsRefs) db.todoTags],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (todoTagsRefs)
+                    await $_getPrefetchedData<TodoItem, $TodoItemsTable,
+                            TodoTag>(
+                        currentTable: table,
+                        referencedTable:
+                            $$TodoItemsTableReferences._todoTagsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$TodoItemsTableReferences(db, table, p0)
+                                .todoTagsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.todoId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
@@ -654,9 +938,9 @@ typedef $$TodoItemsTableProcessedTableManager = ProcessedTableManager<
     $$TodoItemsTableAnnotationComposer,
     $$TodoItemsTableCreateCompanionBuilder,
     $$TodoItemsTableUpdateCompanionBuilder,
-    (TodoItem, BaseReferences<_$AppDatabase, $TodoItemsTable, TodoItem>),
+    (TodoItem, $$TodoItemsTableReferences),
     TodoItem,
-    PrefetchHooks Function()>;
+    PrefetchHooks Function({bool todoTagsRefs})>;
 typedef $$TagsTableCreateCompanionBuilder = TagsCompanion Function({
   Value<int> id,
   required String name,
@@ -665,6 +949,25 @@ typedef $$TagsTableUpdateCompanionBuilder = TagsCompanion Function({
   Value<int> id,
   Value<String> name,
 });
+
+final class $$TagsTableReferences
+    extends BaseReferences<_$AppDatabase, $TagsTable, Tag> {
+  $$TagsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$TodoTagsTable, List<TodoTag>> _todoTagsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.todoTags,
+          aliasName: $_aliasNameGenerator(db.tags.id, db.todoTags.tagId));
+
+  $$TodoTagsTableProcessedTableManager get todoTagsRefs {
+    final manager = $$TodoTagsTableTableManager($_db, $_db.todoTags)
+        .filter((f) => f.tagId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_todoTagsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
 
 class $$TagsTableFilterComposer extends Composer<_$AppDatabase, $TagsTable> {
   $$TagsTableFilterComposer({
@@ -679,6 +982,27 @@ class $$TagsTableFilterComposer extends Composer<_$AppDatabase, $TagsTable> {
 
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> todoTagsRefs(
+      Expression<bool> Function($$TodoTagsTableFilterComposer f) f) {
+    final $$TodoTagsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.todoTags,
+        getReferencedColumn: (t) => t.tagId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TodoTagsTableFilterComposer(
+              $db: $db,
+              $table: $db.todoTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$TagsTableOrderingComposer extends Composer<_$AppDatabase, $TagsTable> {
@@ -710,6 +1034,27 @@ class $$TagsTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  Expression<T> todoTagsRefs<T extends Object>(
+      Expression<T> Function($$TodoTagsTableAnnotationComposer a) f) {
+    final $$TodoTagsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.todoTags,
+        getReferencedColumn: (t) => t.tagId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TodoTagsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.todoTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$TagsTableTableManager extends RootTableManager<
@@ -721,9 +1066,9 @@ class $$TagsTableTableManager extends RootTableManager<
     $$TagsTableAnnotationComposer,
     $$TagsTableCreateCompanionBuilder,
     $$TagsTableUpdateCompanionBuilder,
-    (Tag, BaseReferences<_$AppDatabase, $TagsTable, Tag>),
+    (Tag, $$TagsTableReferences),
     Tag,
-    PrefetchHooks Function()> {
+    PrefetchHooks Function({bool todoTagsRefs})> {
   $$TagsTableTableManager(_$AppDatabase db, $TagsTable table)
       : super(TableManagerState(
           db: db,
@@ -751,9 +1096,31 @@ class $$TagsTableTableManager extends RootTableManager<
             name: name,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) =>
+                  (e.readTable(table), $$TagsTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({todoTagsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (todoTagsRefs) db.todoTags],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (todoTagsRefs)
+                    await $_getPrefetchedData<Tag, $TagsTable, TodoTag>(
+                        currentTable: table,
+                        referencedTable:
+                            $$TagsTableReferences._todoTagsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$TagsTableReferences(db, table, p0).todoTagsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.tagId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
@@ -766,9 +1133,307 @@ typedef $$TagsTableProcessedTableManager = ProcessedTableManager<
     $$TagsTableAnnotationComposer,
     $$TagsTableCreateCompanionBuilder,
     $$TagsTableUpdateCompanionBuilder,
-    (Tag, BaseReferences<_$AppDatabase, $TagsTable, Tag>),
+    (Tag, $$TagsTableReferences),
     Tag,
-    PrefetchHooks Function()>;
+    PrefetchHooks Function({bool todoTagsRefs})>;
+typedef $$TodoTagsTableCreateCompanionBuilder = TodoTagsCompanion Function({
+  required int todoId,
+  required int tagId,
+  Value<int> rowid,
+});
+typedef $$TodoTagsTableUpdateCompanionBuilder = TodoTagsCompanion Function({
+  Value<int> todoId,
+  Value<int> tagId,
+  Value<int> rowid,
+});
+
+final class $$TodoTagsTableReferences
+    extends BaseReferences<_$AppDatabase, $TodoTagsTable, TodoTag> {
+  $$TodoTagsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $TodoItemsTable _todoIdTable(_$AppDatabase db) => db.todoItems
+      .createAlias($_aliasNameGenerator(db.todoTags.todoId, db.todoItems.id));
+
+  $$TodoItemsTableProcessedTableManager get todoId {
+    final $_column = $_itemColumn<int>('todo_id')!;
+
+    final manager = $$TodoItemsTableTableManager($_db, $_db.todoItems)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_todoIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $TagsTable _tagIdTable(_$AppDatabase db) =>
+      db.tags.createAlias($_aliasNameGenerator(db.todoTags.tagId, db.tags.id));
+
+  $$TagsTableProcessedTableManager get tagId {
+    final $_column = $_itemColumn<int>('tag_id')!;
+
+    final manager = $$TagsTableTableManager($_db, $_db.tags)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tagIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$TodoTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $TodoTagsTable> {
+  $$TodoTagsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$TodoItemsTableFilterComposer get todoId {
+    final $$TodoItemsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.todoId,
+        referencedTable: $db.todoItems,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TodoItemsTableFilterComposer(
+              $db: $db,
+              $table: $db.todoItems,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$TagsTableFilterComposer get tagId {
+    final $$TagsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.tagId,
+        referencedTable: $db.tags,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TagsTableFilterComposer(
+              $db: $db,
+              $table: $db.tags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$TodoTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TodoTagsTable> {
+  $$TodoTagsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$TodoItemsTableOrderingComposer get todoId {
+    final $$TodoItemsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.todoId,
+        referencedTable: $db.todoItems,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TodoItemsTableOrderingComposer(
+              $db: $db,
+              $table: $db.todoItems,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$TagsTableOrderingComposer get tagId {
+    final $$TagsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.tagId,
+        referencedTable: $db.tags,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TagsTableOrderingComposer(
+              $db: $db,
+              $table: $db.tags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$TodoTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TodoTagsTable> {
+  $$TodoTagsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$TodoItemsTableAnnotationComposer get todoId {
+    final $$TodoItemsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.todoId,
+        referencedTable: $db.todoItems,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TodoItemsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.todoItems,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$TagsTableAnnotationComposer get tagId {
+    final $$TagsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.tagId,
+        referencedTable: $db.tags,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TagsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.tags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$TodoTagsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $TodoTagsTable,
+    TodoTag,
+    $$TodoTagsTableFilterComposer,
+    $$TodoTagsTableOrderingComposer,
+    $$TodoTagsTableAnnotationComposer,
+    $$TodoTagsTableCreateCompanionBuilder,
+    $$TodoTagsTableUpdateCompanionBuilder,
+    (TodoTag, $$TodoTagsTableReferences),
+    TodoTag,
+    PrefetchHooks Function({bool todoId, bool tagId})> {
+  $$TodoTagsTableTableManager(_$AppDatabase db, $TodoTagsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TodoTagsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TodoTagsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TodoTagsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> todoId = const Value.absent(),
+            Value<int> tagId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TodoTagsCompanion(
+            todoId: todoId,
+            tagId: tagId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required int todoId,
+            required int tagId,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TodoTagsCompanion.insert(
+            todoId: todoId,
+            tagId: tagId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) =>
+                  (e.readTable(table), $$TodoTagsTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: ({todoId = false, tagId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (todoId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.todoId,
+                    referencedTable: $$TodoTagsTableReferences._todoIdTable(db),
+                    referencedColumn:
+                        $$TodoTagsTableReferences._todoIdTable(db).id,
+                  ) as T;
+                }
+                if (tagId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.tagId,
+                    referencedTable: $$TodoTagsTableReferences._tagIdTable(db),
+                    referencedColumn:
+                        $$TodoTagsTableReferences._tagIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$TodoTagsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $TodoTagsTable,
+    TodoTag,
+    $$TodoTagsTableFilterComposer,
+    $$TodoTagsTableOrderingComposer,
+    $$TodoTagsTableAnnotationComposer,
+    $$TodoTagsTableCreateCompanionBuilder,
+    $$TodoTagsTableUpdateCompanionBuilder,
+    (TodoTag, $$TodoTagsTableReferences),
+    TodoTag,
+    PrefetchHooks Function({bool todoId, bool tagId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -776,4 +1441,6 @@ class $AppDatabaseManager {
   $$TodoItemsTableTableManager get todoItems =>
       $$TodoItemsTableTableManager(_db, _db.todoItems);
   $$TagsTableTableManager get tags => $$TagsTableTableManager(_db, _db.tags);
+  $$TodoTagsTableTableManager get todoTags =>
+      $$TodoTagsTableTableManager(_db, _db.todoTags);
 }

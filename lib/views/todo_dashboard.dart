@@ -19,34 +19,37 @@ class TodoDashboard extends StatelessWidget {
           )
         ],
       ),
-      body: StreamBuilder<List<TodoItem>>(
+      body: StreamBuilder<List<TodoWithTags>>(
         stream: database.watchAllTodos(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
+            print('Loading...');
             return Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
+            print('Error: ${snapshot.error}');
             return Center(
               child: Text('Error: ${snapshot.error}'),
             );
           }
 
-          final todos = snapshot.data!;
+          final items = snapshot.data!;
+          print('Items: $items');
 
-          if (todos.isEmpty) {
+          if (items.isEmpty) {
             return Center(
               child: Text('No todos yet. Add your first todo!'),
             );
           }
 
           return ListView.builder(
-            itemCount: todos.length,
+            itemCount: items.length,
             itemBuilder: (context, index) {
-              final todo = todos[index];
+              final item = items[index];
 
               return Dismissible(
-                key: Key(todo.id.toString()),
+                key: Key(item.todo.id.toString()),
                 direction: DismissDirection.endToStart,
                 background: Container(
                   color: Colors.red,
@@ -64,7 +67,7 @@ class TodoDashboard extends StatelessWidget {
                     builder: (context) => AlertDialog(
                       title: Text('Delete Todo'),
                       content: Text(
-                          'Are you sure you want to delete "${todo.title}"?'),
+                          'Are you sure you want to delete "${item.todo.title}"?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(false),
@@ -81,21 +84,21 @@ class TodoDashboard extends StatelessWidget {
                   );
                 },
                 onDismissed: (direction) {
-                  database.deleteTodo(todo.id);
+                  database.deleteTodo(item.todo.id);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${todo.title} deleted')),
+                    SnackBar(content: Text('${item.todo.title} deleted')),
                   );
                 },
                 child: ListTile(
-                  title: Text(todo.title),
-                  subtitle: Text(todo.content),
+                  title: Text(item.todo.title),
+                  subtitle: Text(item.todo.content),
                   trailing: Checkbox(
-                      value: todo.completed,
+                      value: item.todo.completed,
                       onChanged: (value) {
-                        database.toggleTodo(todo.id);
+                        database.toggleTodo(item.todo.id);
                       }),
                   onTap: () => Navigator.pushNamed(context, '/create-todos',
-                      arguments: {'todo': todo}),
+                      arguments: {'todo': item}),
                 ),
               );
             },

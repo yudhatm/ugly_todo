@@ -3,7 +3,7 @@ import 'package:ugly_todo/database/database.dart';
 
 part 'tags_dao.g.dart';
 
-@DriftAccessor(tables: [Tags])
+@DriftAccessor(tables: [Tags, TodoTags])
 class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
   TagsDao(AppDatabase db) : super(db);
 
@@ -29,5 +29,19 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
 
   Future<int> deleteTag(Tag tag) {
     return delete(tags).delete(tag);
+  }
+
+  Future<void> createTodoTagAssociation(int todoId, int tagId) async {
+    await into(todoTags).insert(TodoTagsCompanion(
+      todoId: Value(todoId),
+      tagId: Value(tagId),
+    ));
+  }
+
+  Future<void> deleteTodoTagAssociation(int todoId, int tagId) async {
+    await (delete(todoTags)
+          ..where((t) => t.todoId.equals(todoId))
+          ..where((t) => t.tagId.equals(tagId)))
+        .go();
   }
 }
