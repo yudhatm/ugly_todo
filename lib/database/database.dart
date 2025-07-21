@@ -76,10 +76,6 @@ class AppDatabase extends _$AppDatabase {
           tags: [row.readTable(tags)]);
     }).watch();
 
-    stream.listen((list) {
-      print('Items: $list');
-    });
-
     return stream;
   }
 

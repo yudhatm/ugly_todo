@@ -1,6 +1,6 @@
 ## Daily Progress
 
-17 July 2025
+### Thursday, 17 July 2025
 
 What I do:
 
@@ -14,3 +14,17 @@ Next:
 - Display Tag Label in the Todo list
 - Sort / Filter by Label
 - Make Todo ListView into GridView
+
+### Saturday, 19 July 2025
+
+What I do:
+
+- Finish stream TodoWithTag stream test
+- Add Tag Label display and "Add Tag" button UI to Create Todo View
+
+Next:
+
+- Create a view to show created tags saved in the database, called Tag List View
+- Create the ability to add new tag and pick tags to use in the Tag List View
+- Create search tag function in Tag List View
+- Make TodoList into Grid View (tentative)

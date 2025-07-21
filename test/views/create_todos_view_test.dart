@@ -143,4 +143,20 @@ void main() {
 
     await appDatabase.close();
   });
+
+  testWidgets('should show tags properly', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: CreateTodosView(database: appDatabase),
+    ));
+
+    expect(find.text('Tags'), findsOneWidget);
+
+    //Change after add add tag view
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tag 1'), findsOneWidget);
+
+    await appDatabase.close();
+  });
 }

@@ -159,6 +159,17 @@ void main() {
   test('should get todo with tags list when using stream', () async {
     final todo = await appDatabase.createTodo('test title');
     final tag = await tagsDao.createTag('urgent');
-    final todoTag = await tagsDao.createTodoTagAssociation(todo, tag);
+    final tag2 = await tagsDao.createTag('personal');
+    await tagsDao.createTodoTagAssociation(todo, tag);
+    await tagsDao.createTodoTagAssociation(todo, tag2);
+
+    final stream = appDatabase.watchAllTodos();
+    stream.listen((data) {
+      expect(data.length, 1);
+      expect(data.first.todo.id, todo);
+      expect(data.first.tags.length, 2);
+    });
+
+    await appDatabase.close();
   });
 }

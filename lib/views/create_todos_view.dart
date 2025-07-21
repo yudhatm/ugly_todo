@@ -17,6 +17,8 @@ class _CreateTodosViewState extends State<CreateTodosView> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
+  var tags = <String>[];
+
   @override
   void initState() {
     super.initState();
@@ -69,6 +71,38 @@ class _CreateTodosViewState extends State<CreateTodosView> {
                 validator: (value) {
                   return null;
                 },
+              ),
+              SizedBox(height: 16.0),
+              Row(
+                children: [
+                  Text(
+                    'Tags',
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                  Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        tags.add('Tag ${tags.length + 1}');
+                      });
+                    },
+                    icon: Icon(Icons.add),
+                  ),
+                ],
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Wrap(
+                  alignment: WrapAlignment.start,
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: List.generate(
+                    tags.length,
+                    (int index) => Chip(
+                      label: Text(tags[index]),
+                    ),
+                  ),
+                ),
               )
             ],
           ),
