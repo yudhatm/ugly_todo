@@ -112,7 +112,7 @@ void main() {
 
       final stream = appDatabase.watchAllTodos();
 
-      await expectLater(stream, emits((List<TodoItem> value) {
+      await expectLater(stream, emits((List<TodoWithTags> value) {
         return value.length == 3;
       }));
     });
@@ -121,7 +121,7 @@ void main() {
       final stream = appDatabase.watchAllTodos();
       await appDatabase.createTodo('stream title 1');
 
-      await expectLater(stream, emits((List<TodoItem> value) {
+      await expectLater(stream, emits((List<TodoWithTags> value) {
         return value.length == 1;
       }));
     });
@@ -131,16 +131,16 @@ void main() {
       final newTodo = await appDatabase.createTodo('stream title 1',
           content: 'this is old');
 
-      await expectLater(stream, emits((List<TodoItem> value) {
-        return value.first.id == newTodo &&
-            value.first.content == 'this is old';
+      await expectLater(stream, emits((List<TodoWithTags> value) {
+        return value.first.todo.id == newTodo &&
+            value.first.todo.content == 'this is old';
       }));
 
       await appDatabase.updateTodo(newTodo, content: 'this is new');
 
-      await expectLater(stream, emits((List<TodoItem> value) {
-        return value.first.id == newTodo &&
-            value.first.content == 'this is new';
+      await expectLater(stream, emits((List<TodoWithTags> value) {
+        return value.first.todo.id == newTodo &&
+            value.first.todo.content == 'this is new';
       }));
     });
 
@@ -149,21 +149,21 @@ void main() {
       final todo1 = await appDatabase.createTodo('title 1');
       final todo2 = await appDatabase.createTodo('title 2');
 
-      expectLater(stream, emits((List<TodoItem> value) {
+      expectLater(stream, emits((List<TodoWithTags> value) {
         return value.length == 2;
       }));
 
       await appDatabase.deleteTodo(todo1);
 
-      expectLater(stream, emits((List<TodoItem> value) {
-        return value.length == 1 && value.first.id == todo2;
+      expectLater(stream, emits((List<TodoWithTags> value) {
+        return value.length == 1 && value.first.todo.id == todo2;
       }));
     });
 
     test('should be able to stream empty list', () async {
       final stream = appDatabase.watchAllTodos();
 
-      expectLater(stream, emits((List<TodoItem> value) {
+      expectLater(stream, emits((List<TodoWithTags> value) {
         return value.isEmpty;
       }));
     });

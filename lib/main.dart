@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ugly_todo/database/database.dart';
 import 'package:ugly_todo/views/create_todos_view.dart';
+import 'package:ugly_todo/views/tag_list_view.dart';
 import 'package:ugly_todo/views/todo_dashboard.dart';
 
 void main() {
@@ -27,6 +28,9 @@ class MainApp extends StatelessWidget {
           final args = ModalRoute.of(context)?.settings.arguments
               as Map<String, dynamic>?;
           return CreateTodosView(database: database, todo: args?['todo']);
+        },
+        '/tag-list': (context) {
+          return TagListView(database: database);
         }
       },
     );

@@ -28,7 +28,7 @@ class TodoTags extends Table {
 
 class TodoWithTags {
   final TodoItem todo;
-  final List<Tag> tags;
+  final List<Tag?> tags;
 
   TodoWithTags({required this.todo, required this.tags});
 }
@@ -73,7 +73,7 @@ class AppDatabase extends _$AppDatabase {
             createdAt: row.readTable(todoItems).createdAt,
             completed: row.readTable(todoItems).completed,
           ),
-          tags: [row.readTable(tags)]);
+          tags: [row.readTableOrNull(tags)]);
     }).watch();
 
     return stream;

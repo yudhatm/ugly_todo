@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ugly_todo/database/database.dart';
+import 'package:ugly_todo/views/tag_list_view.dart';
 
 class CreateTodosView extends StatefulWidget {
   final AppDatabase database;
   final TodoItem? todo;
 
-  const CreateTodosView({super.key, required this.database, this.todo});
+  CreateTodosView({
+    super.key,
+    required this.database,
+    this.todo,
+  });
 
   @override
   State<CreateTodosView> createState() => _CreateTodosViewState();
@@ -17,7 +22,7 @@ class _CreateTodosViewState extends State<CreateTodosView> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  var tags = <String>[];
+  late List<Tag> activeTags = [];
 
   @override
   void initState() {
@@ -82,8 +87,22 @@ class _CreateTodosViewState extends State<CreateTodosView> {
                   Spacer(),
                   IconButton(
                     onPressed: () {
-                      setState(() {
-                        tags.add('Tag ${tags.length + 1}');
+                      final selectedTag = Navigator.push<Tag>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TagListView(
+                            database: widget.database,
+                          ),
+                        ),
+                      );
+
+                      selectedTag.then((value) {
+                        if (value != null) {
+                          activeTags.clear();
+                          setState(() {
+                            activeTags.add(value);
+                          });
+                        }
                       });
                     },
                     icon: Icon(Icons.add),
@@ -97,9 +116,9 @@ class _CreateTodosViewState extends State<CreateTodosView> {
                   spacing: 8.0,
                   runSpacing: 4.0,
                   children: List.generate(
-                    tags.length,
+                    activeTags.length,
                     (int index) => Chip(
-                      label: Text(tags[index]),
+                      label: Text(activeTags[index].name),
                     ),
                   ),
                 ),

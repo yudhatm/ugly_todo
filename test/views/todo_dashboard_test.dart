@@ -28,7 +28,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.byType(StreamBuilder<List<TodoItem>>), findsOneWidget);
+    expect(find.byType(StreamBuilder<List<TodoWithTags>>), findsOneWidget);
     expect(find.byType(ListView), findsOneWidget);
 
     await appDatabase.close();

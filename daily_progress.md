@@ -28,3 +28,16 @@ Next:
 - Create the ability to add new tag and pick tags to use in the Tag List View
 - Create search tag function in Tag List View
 - Make TodoList into Grid View (tentative)
+
+### Tuesday, 22 July 2025
+
+What I do:
+
+- Implement add and delete tag UI
+- Create stream list view to display tags using Stream
+- Delay adding search tag function until needed
+- Show selected tag in add / edit todo view after selecting existing tag
+
+Next:
+
+- Create todo-tag association after add / edit tag is finished

@@ -19,6 +19,10 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
     return (select(tags)..where((t) => t.name.contains(nameQuery))).get();
   }
 
+  Stream<List<Tag>> watchAllTags() {
+    return select(tags).watch();
+  }
+
   Future<List<Tag>> getAllTags() {
     return select(tags).get();
   }
