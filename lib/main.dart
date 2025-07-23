@@ -27,7 +27,8 @@ class MainApp extends StatelessWidget {
         '/create-todos': (context) {
           final args = ModalRoute.of(context)?.settings.arguments
               as Map<String, dynamic>?;
-          return CreateTodosView(database: database, todo: args?['todo']);
+          return CreateTodosView(
+              database: database, todoTags: args?['todoTags']);
         },
         '/tag-list': (context) {
           return TagListView(database: database);

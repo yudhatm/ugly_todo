@@ -1,16 +1,16 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:ugly_todo/database/database.dart';
 import 'package:ugly_todo/views/tag_list_view.dart';
 
 class CreateTodosView extends StatefulWidget {
   final AppDatabase database;
-  final TodoItem? todo;
+  final TodoWithTags? todoTags;
 
-  CreateTodosView({
+  const CreateTodosView({
     super.key,
     required this.database,
-    this.todo,
+    this.todoTags,
   });
 
   @override
@@ -22,15 +22,26 @@ class _CreateTodosViewState extends State<CreateTodosView> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
+  late TodoItem? todo;
   late List<Tag> activeTags = [];
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.todo != null) {
-      _titleController.text = widget.todo!.title;
-      _contentController.text = widget.todo!.content;
+    if (widget.todoTags != null) {
+      widget.database.findTodo(id: widget.todoTags!.todo.id).then((todo) {
+        if (todo != null) {
+          _titleController.text = todo.title;
+          _contentController.text = todo.content;
+        }
+
+        setState(() {
+          activeTags.addAll(
+            widget.todoTags!.tags != null ? widget.todoTags!.tags! : [],
+          );
+        });
+      });
     }
   }
 
@@ -38,11 +49,17 @@ class _CreateTodosViewState extends State<CreateTodosView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.todo == null ? 'Add Todo' : 'Edit Todo'),
+        title: Text(widget.todoTags == null ? 'Add Todo' : 'Edit Todo'),
         actions: [
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: _saveTodo,
+            onPressed: () {
+              _saveTodo().then((_) {
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              });
+            },
           )
         ],
       ),
@@ -130,17 +147,27 @@ class _CreateTodosViewState extends State<CreateTodosView> {
     );
   }
 
-  void _saveTodo() {
+  Future<void> _saveTodo() async {
     if (_formKey.currentState!.validate()) {
-      if (widget.todo != null) {
-        widget.database.updateTodo(widget.todo!.id,
+      if (widget.todoTags != null) {
+        widget.database.updateTodo(widget.todoTags!.todo.id,
             title: _titleController.text, content: _contentController.text);
-      } else {
-        widget.database.createTodo(_titleController.text,
-            content: _contentController.text);
-      }
 
-      Navigator.pop(context);
+        await widget.database.todoTags
+            .deleteWhere((t) => t.todoId.equals(widget.todoTags!.todo.id));
+
+        for (final tag in activeTags) {
+          widget.database.tagsDao
+              .createTodoTagAssociation(widget.todoTags!.todo.id, tag.id);
+        }
+      } else {
+        final todoId = await widget.database.createTodo(_titleController.text,
+            content: _contentController.text);
+
+        for (final tag in activeTags) {
+          widget.database.tagsDao.createTodoTagAssociation(todoId, tag.id);
+        }
+      }
     }
   }
 }

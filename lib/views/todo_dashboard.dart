@@ -92,13 +92,17 @@ class TodoDashboard extends StatelessWidget {
                 child: ListTile(
                   title: Text(item.todo.title),
                   subtitle: Text(item.todo.content),
+                  leading: Text(
+                    item.tags != null ? item.tags!.first.name : '',
+                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20),
+                  ),
                   trailing: Checkbox(
                       value: item.todo.completed,
                       onChanged: (value) {
                         database.toggleTodo(item.todo.id);
                       }),
                   onTap: () => Navigator.pushNamed(context, '/create-todos',
-                      arguments: {'todo': item}),
+                      arguments: {'todoTags': item}),
                 ),
               );
             },

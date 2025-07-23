@@ -28,7 +28,7 @@ class TodoTags extends Table {
 
 class TodoWithTags {
   final TodoItem todo;
-  final List<Tag?> tags;
+  final List<Tag>? tags;
 
   TodoWithTags({required this.todo, required this.tags});
 }
@@ -65,6 +65,7 @@ class AppDatabase extends _$AppDatabase {
       leftOuterJoin(todoTags, todoItems.id.equalsExp(todoTags.todoId)),
       leftOuterJoin(tags, todoTags.tagId.equalsExp(tags.id))
     ]).map((row) {
+      var tag = row.readTableOrNull(tags);
       return TodoWithTags(
           todo: TodoItem(
             id: row.readTable(todoItems).id,
@@ -73,7 +74,7 @@ class AppDatabase extends _$AppDatabase {
             createdAt: row.readTable(todoItems).createdAt,
             completed: row.readTable(todoItems).completed,
           ),
-          tags: [row.readTableOrNull(tags)]);
+          tags: tag == null ? null : [tag]);
     }).watch();
 
     return stream;
@@ -81,6 +82,24 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<TodoItem>> getAllTodos() {
     return managers.todoItems.get();
+  }
+
+  Future<List<TodoWithTags>> getAllTodoWithTags() {
+    return select(todoItems).join([
+      leftOuterJoin(todoTags, todoItems.id.equalsExp(todoTags.todoId)),
+      leftOuterJoin(tags, todoTags.tagId.equalsExp(tags.id))
+    ]).map((row) {
+      var tag = row.readTableOrNull(tags);
+      return TodoWithTags(
+          todo: TodoItem(
+            id: row.readTable(todoItems).id,
+            title: row.readTable(todoItems).title,
+            content: row.readTable(todoItems).content,
+            createdAt: row.readTable(todoItems).createdAt,
+            completed: row.readTable(todoItems).completed,
+          ),
+          tags: tag == null ? null : [tag]);
+    }).get();
   }
 
   Future<int> createTodo(String title, {String content = ''}) async {

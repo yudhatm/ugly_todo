@@ -167,7 +167,7 @@ void main() {
     stream.listen((data) {
       expect(data.length, 1);
       expect(data.first.todo.id, todo);
-      expect(data.first.tags.length, 2);
+      expect(data.first.tags!.length, 2);
     });
 
     await appDatabase.close();
