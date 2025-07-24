@@ -5,8 +5,8 @@
 ## Current Status
 
 - ✅ Basic CRUD operations with Drift
-- 🔄 Currently working on: Adding tags to Todo
-- 📅 Next up: Express.js API integration
+- 🔄 Currently working on: -
+- 📅 Next up: Express.js API integration (Maybe)
 
 ## Tech Stack
 
@@ -22,6 +22,5 @@
 
 ## Next Steps
 
-1. Add categories/tags
-2. Build Express.js API
-3. Connect Flutter to API
+1. Build Express.js API
+2. Connect Flutter to API
