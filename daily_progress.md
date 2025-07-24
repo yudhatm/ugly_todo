@@ -41,3 +41,12 @@ What I do:
 Next:
 
 - Create todo-tag association after add / edit tag is finished
+
+### Wednesday, 23 July 2025
+
+What I do:
+- Finished implementation of creating todo-tag association after add / edit todo is finished
+- Display tags in the todo list (need refinement)
+
+Next:
+- Adding API? Login?
